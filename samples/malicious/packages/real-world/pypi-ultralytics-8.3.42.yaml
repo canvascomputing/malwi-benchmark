@@ -1,0 +1,10 @@
+description: >
+  Modifies downloads.py and model.py to download and execute an XMRig cryptocurrency
+  miner. Runs silently in the background consuming system resources for Monero mining.
+  Injected via GitHub Actions script injection and cache poisoning.
+file: pypi-ultralytics-8.3.42.zip
+discovery: 12/05/2024
+label: malicious
+format: mixed
+timing:
+  - run-time

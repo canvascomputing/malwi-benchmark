@@ -1,0 +1,14 @@
+description: >
+  Impersonates Alibaba Cloud AI Labs SDK. Hides malicious code inside ML model files
+  stored in Pickle format. Upon deserialization, executes base64-obfuscated code that
+  exfiltrates user information, network addresses, organization names, and .gitconfig
+  contents to an attacker-controlled server.
+file: pypi-aliyun-ai-labs-sdk-1.0.0.zip
+discovery: 05/20/2025
+label: malicious
+format: mixed
+timing:
+  - run-time
+obfuscation:
+  - base64
+  - serialization

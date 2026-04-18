@@ -1,0 +1,11 @@
+description: >
+  Injects an addToQueue function into the Solana Web3.js library that captures private
+  keys used for transaction signing. Exfiltrates keys to an attacker-controlled domain
+  (sol-rpc.xyz) disguised as legitimate CloudFlare headers. Published via a compromised
+  maintainer npm account.
+file: npm-solana-web3.js-1.95.7.zip
+discovery: 12/03/2024
+label: malicious
+format: text
+timing:
+  - run-time

@@ -1,0 +1,13 @@
+description: >
+  Shai-Hulud self-replicating worm payload delivered via postinstall script (bundle.js).
+  Steals npm tokens, GitHub PATs, and cloud credentials. Uses TruffleHog to find leaked
+  secrets. Self-propagates by discovering and republishing other packages maintained by
+  the compromised developer with the worm injected.
+file: npm-ngx-bootstrap-20.0.6.zip
+discovery: 09/15/2025
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - minification

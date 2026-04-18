@@ -1,0 +1,13 @@
+description: >
+  Injects base64-encoded credential stealer into proxy_server.py at line 128.
+  Harvests 50+ credential paths including SSH keys, cloud credentials (AWS/GCP/Azure),
+  Kubernetes secrets, database passwords, and CI/CD tokens.
+  Encrypts collected data with AES-256-CBC and exfiltrates via HTTPS POST.
+file: pypi-litellm-1.82.7.zip
+discovery: 03/24/2026
+label: malicious
+format: text
+timing:
+  - run-time
+obfuscation:
+  - base64

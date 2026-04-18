@@ -1,0 +1,14 @@
+description: >
+  Contains the core NodeCordRAT payload. Used as a dependency by bitcoin-main-lib and
+  bitcoin-lib-js. Implements Discord-based C2 communication with a hardcoded bot token.
+  Steals Chrome credentials, MetaMask seed phrases, and API secrets. Exfiltrates data
+  as attachments to a private Discord channel.
+file: npm-bip40-1.0.6.zip
+discovery: 11/26/2025
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - hex-encoding
+  - code-hiding

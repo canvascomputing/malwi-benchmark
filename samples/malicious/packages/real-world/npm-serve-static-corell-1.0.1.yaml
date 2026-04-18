@@ -1,0 +1,12 @@
+description: >
+  Typosquat of serve-static. Postinstall script executes a heavily obfuscated main.js
+  that establishes communication with a centralized C2 server for arbitrary remote
+  command execution on the victim machine.
+file: npm-serve-static-corell-1.0.1.zip
+discovery: 01/09/2025
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - code-hiding

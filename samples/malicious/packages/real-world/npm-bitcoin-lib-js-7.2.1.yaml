@@ -1,0 +1,13 @@
+description: >
+  Typosquat of bitcoinjs-lib. Part of the NodeCordRAT campaign. Postinstall script
+  launches a persistent process via PM2 that uses Discord REST API for C2 communication.
+  Targets Chrome credentials, MetaMask keys, and API tokens.
+file: npm-bitcoin-lib-js-7.2.1.zip
+discovery: 11/26/2025
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - hex-encoding
+  - code-hiding

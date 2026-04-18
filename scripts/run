@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+"""Benchmark runner for agentic malware detection tools."""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import zipfile
+from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
+
+SAMPLES_DIR = Path("samples")
+RESULTS_DIR = Path("results")
+ZIP_PASSWORD = b"malwi"
+
+
+@dataclass
+class SampleResult:
+    name: str
+    expected: str
+    predicted: str
+    input_tokens: int
+    output_tokens: int
+    elapsed: float
+
+    @property
+    def match(self) -> bool:
+        return self.predicted == self.expected
+
+
+def find_samples() -> list[Path]:
+    """Find all .zip samples sorted by path."""
+    return sorted(SAMPLES_DIR.rglob("*.zip"))
+
+
+def read_ground_truth(zip_path: Path) -> str:
+    """Read expected label from companion .yaml file."""
+    yaml_path = zip_path.with_suffix(".yaml")
+    if not yaml_path.exists():
+        return ""
+    for line in yaml_path.read_text().splitlines():
+        if line.startswith("label:"):
+            return line.split(":", 1)[1].strip()
+    return ""
+
+
+def unpack_sample(zip_path: Path, dest: Path) -> None:
+    """Unpack a password-protected ZIP into dest."""
+    dest.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(zip_path) as zf:
+        zf.extractall(dest, pwd=ZIP_PASSWORD)
+
+
+def parse_result(path: Path) -> tuple[str, int, int]:
+    """Read status, input_tokens, output_tokens from result JSON."""
+    try:
+        data = json.loads(path.read_text())
+        status = data.get("status", "error")
+        input_tokens = int(data.get("input_tokens", 0))
+        output_tokens = int(data.get("output_tokens", 0))
+        return status, input_tokens, output_tokens
+    except (json.JSONDecodeError, OSError, ValueError):
+        return "error", 0, 0
+
+
+def run_sample(cmd_template: str, zip_path: Path, tmp: Path) -> SampleResult:
+    """Unpack, run tool, parse result, return SampleResult."""
+    name = zip_path.stem
+    expected = read_ground_truth(zip_path)
+
+    sample_dir = tmp / name
+    result_file = tmp / f"{name}.json"
+
+    unpack_sample(zip_path, sample_dir)
+
+    cmd = cmd_template.replace("@", str(sample_dir)).replace("#", str(result_file))
+
+    start = time.monotonic()
+    subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL)
+    elapsed = time.monotonic() - start
+
+    predicted, input_tokens, output_tokens = parse_result(result_file)
+
+    shutil.rmtree(sample_dir, ignore_errors=True)
+    if result_file.exists():
+        result_file.unlink()
+
+    return SampleResult(
+        name=name,
+        expected=expected,
+        predicted=predicted,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        elapsed=round(elapsed, 2),
+    )
+
+
+def compute_metrics(results: list[SampleResult]) -> dict:
+    """Compute precision, recall, averages from results."""
+    tp = fp = fn = tn = 0
+    sum_input = sum_output = 0
+    sum_time = 0.0
+
+    for r in results:
+        if r.expected == "malicious" and r.match:
+            tp += 1
+        elif r.expected == "malicious" and not r.match:
+            fn += 1
+        elif r.expected != "malicious" and r.predicted == "malicious":
+            fp += 1
+        elif r.expected != "malicious" and r.predicted != "malicious" and r.match:
+            tn += 1
+        sum_input += r.input_tokens
+        sum_output += r.output_tokens
+        sum_time += r.elapsed
+
+    total = len(results)
+    precision = f"{tp / (tp + fp) * 100:.1f}" if (tp + fp) > 0 else "n/a"
+    recall = f"{tp / (tp + fn) * 100:.1f}" if (tp + fn) > 0 else "n/a"
+    avg_input = round(sum_input / total) if total else 0
+    avg_output = round(sum_output / total) if total else 0
+    avg_time = round(sum_time / total, 2) if total else 0.0
+
+    return {
+        "total": total,
+        "precision": precision,
+        "recall": recall,
+        "avg_input": avg_input,
+        "avg_output": avg_output,
+        "sum_input": sum_input,
+        "sum_output": sum_output,
+        "avg_time": avg_time,
+        "sum_time": round(sum_time, 2),
+    }
+
+
+def write_report(
+    results: list[SampleResult], metrics: dict, model: str, tool: str, output: Path
+) -> None:
+    """Write markdown report to output path."""
+    lines = [
+        "# Benchmark Results",
+        "",
+        f"- **Date:** {date.today().strftime('%m-%d-%Y')}",
+        f"- **Model:** {model}",
+        f"- **Tool:** {tool}",
+        "",
+        "## Summary",
+        "",
+        "| Metric | Value |",
+        "|--------|-------|",
+        f"| Samples | {metrics['total']} |",
+        f"| Precision | {metrics['precision']}% |",
+        f"| Recall | {metrics['recall']}% |",
+        f"| Avg. input tokens | {metrics['avg_input']} |",
+        f"| Avg. output tokens | {metrics['avg_output']} |",
+        f"| Total input tokens | {metrics['sum_input']} |",
+        f"| Total output tokens | {metrics['sum_output']} |",
+        f"| Avg. time | {metrics['avg_time']}s |",
+        f"| Total time | {metrics['sum_time']}s |",
+        "",
+        "## Results",
+        "",
+        "| Sample | Expected | Predicted | Match | Input tokens | Output tokens | Time |",
+        "|--------|----------|-----------|-------|--------------|---------------|------|",
+    ]
+    for r in results:
+        match = "yes" if r.match else "no"
+        lines.append(
+            f"| {r.name} | {r.expected} | {r.predicted} | {match} "
+            f"| {r.input_tokens} | {r.output_tokens} | {r.elapsed}s |"
+        )
+    lines.append("")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\n".join(lines))
+
+
+def main():
+    if len(sys.argv) < 4:
+        print('Usage: make run "<command> @ #" <model> <tool>')
+        print()
+        print("  @ is replaced with the unpacked sample path")
+        print("  # is replaced with the output file path")
+        print()
+        print("  The tool must write JSON to the output file:")
+        print('    { "status": "malicious", "input_tokens": 12500, "output_tokens": 830 }')
+        sys.exit(1)
+
+    cmd_template, model, tool = sys.argv[1], sys.argv[2], sys.argv[3]
+
+    samples = find_samples()
+    if not samples:
+        print(f"No .zip samples found in {SAMPLES_DIR}/")
+        sys.exit(1)
+
+    today = date.today().strftime("%m-%d-%Y")
+    report_path = RESULTS_DIR / f"{today}_{model}_{tool}.md"
+
+    results: list[SampleResult] = []
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        for zip_path in samples:
+            r = run_sample(cmd_template, zip_path, tmp_path)
+            match = "yes" if r.match else "no"
+            print(
+                f"{r.name}  expected={r.expected}  predicted={r.predicted}"
+                f"  match={match}  time={r.elapsed}s"
+            )
+            results.append(r)
+
+    metrics = compute_metrics(results)
+    write_report(results, metrics, model, tool, report_path)
+
+    print()
+    print(f"Results written to {report_path}")
+
+
+if __name__ == "__main__":
+    main()

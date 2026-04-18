@@ -1,0 +1,13 @@
+description: >
+  Installs a .pth file that executes the credential stealer on every Python process
+  startup, including pip itself. Harvests SSH keys, cloud credentials, Kubernetes
+  secrets, and CI/CD tokens. In Kubernetes environments, deploys privileged pods
+  to every cluster node and installs a persistent systemd backdoor.
+file: pypi-litellm-1.82.8.zip
+discovery: 03/24/2026
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - base64
