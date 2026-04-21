@@ -1,0 +1,13 @@
+description: >
+  Typosquat of termcolor. Contains a function that decodes a hex-encoded curl command
+  to download a RAT client (helper.py) from Pastebin. The SilentSync RAT supports
+  remote shell execution, file exfiltration, screenshot capture, and browser credential
+  theft across Windows, Linux, and macOS with platform-specific persistence.
+file: pypi-termncolor-3.1.0.zip
+discovery: 07/22/2025
+label: malicious
+format: text
+timing:
+  - run-time
+obfuscation:
+  - hex-encoding

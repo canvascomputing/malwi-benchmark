@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Dummy detection tool for testing the benchmark harness.
+# Always predicts "benign" with zero token usage.
+echo '{"label":"benign","input_tokens":0,"output_tokens":0}'

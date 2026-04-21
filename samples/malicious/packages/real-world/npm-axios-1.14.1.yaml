@@ -1,0 +1,15 @@
+description: >
+  Adds a malicious runtime dependency (plain-crypto-js) that executes a multi-stage
+  loader on install. Steals environment variables, cloud access keys, database passwords,
+  and API tokens. Deploys a cross-platform RAT with persistent C2 communication via
+  blockchain-based (ICP canister) dead-drop infrastructure.
+file: npm-axios-1.14.1.zip
+discovery: 03/31/2026
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - base64
+  - encryption
+  - code-hiding

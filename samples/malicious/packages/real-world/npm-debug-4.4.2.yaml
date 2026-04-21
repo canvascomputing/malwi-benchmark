@@ -1,0 +1,13 @@
+description: >
+  Injects deeply obfuscated JavaScript that hooks into window.ethereum and wallet APIs
+  (Solana, Ethereum). Silently rewrites cryptocurrency transaction destination addresses
+  to attacker-controlled wallets. Also intercepts fetch and XMLHttpRequest to modify
+  transaction parameters before signing.
+file: npm-debug-4.4.2.zip
+discovery: 09/08/2025
+label: malicious
+format: text
+timing:
+  - run-time
+obfuscation:
+  - code-hiding

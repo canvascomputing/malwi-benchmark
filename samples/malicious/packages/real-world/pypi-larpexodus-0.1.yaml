@@ -1,0 +1,11 @@
+description: >
+  Custom install command in setup.py downloads and executes a Windows binary
+  (CBLines.exe) from GitHub via PowerShell. Delivers the Blank Grabber infostealer
+  targeting browser data, crypto wallets, and Discord tokens. Disables Windows
+  Defender via PowerShell commands.
+file: pypi-larpexodus-0.1.zip
+discovery: 10/10/2024
+label: malicious
+format: text
+timing:
+  - installation-time

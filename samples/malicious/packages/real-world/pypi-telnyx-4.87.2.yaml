@@ -1,0 +1,13 @@
+description: >
+  Embeds encrypted second-stage payload inside a WAV audio file fetched from a remote
+  server. Extracts and XOR-decodes the payload from WAV frames. Steals cloud
+  credentials and API tokens. Part of the TeamPCP supply-chain campaign.
+file: pypi-telnyx-4.87.2.zip
+discovery: 03/27/2026
+label: malicious
+format: mixed
+timing:
+  - installation-time
+obfuscation:
+  - steganography
+  - encryption

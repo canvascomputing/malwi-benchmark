@@ -1,0 +1,12 @@
+description: >
+  Injects obfuscated XMRig cryptominer deployment code. Executes via the npm
+  postinstall lifecycle script to mine Monero cryptocurrency. Published using
+  a stolen npm token alongside the rspack compromise.
+file: npm-vant-4.9.14.zip
+discovery: 12/20/2024
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - code-hiding

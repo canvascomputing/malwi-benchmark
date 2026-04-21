@@ -1,0 +1,12 @@
+description: >
+  Injects obfuscated payload into support.js that deploys an XMRig Monero cryptominer.
+  Fetches miner configuration from a remote C2 server. Executes automatically via the
+  npm postinstall lifecycle script. Published using a stolen npm token.
+file: npm-rspack-core-1.1.7.zip
+discovery: 12/20/2024
+label: malicious
+format: text
+timing:
+  - installation-time
+obfuscation:
+  - code-hiding

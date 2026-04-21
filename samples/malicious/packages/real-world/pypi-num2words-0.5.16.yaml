@@ -1,0 +1,14 @@
+description: >
+  Injects malicious code into __init__.py that loads a bundled Windows DLL (_build.py)
+  on package initialization. The DLL is a Scavenger Loader variant that communicates
+  with C2 servers using XXTEA-encrypted sessions to deploy an infostealer targeting
+  stored credentials, financial data, and PII.
+file: pypi-num2words-0.5.16.zip
+discovery: 07/28/2025
+label: malicious
+format: mixed
+timing:
+  - run-time
+obfuscation:
+  - encryption
+  - packing
